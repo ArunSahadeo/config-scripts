@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cat > index.html <<ENDHTML
+read -r -d '' html_output <<ENDHTML
 <!DOCTYPE HTML>
  <html lang="en">
  <head>
@@ -16,3 +16,11 @@ cat > index.html <<ENDHTML
 </html>
 ENDHTML
 
+if [ -f ./index.html ]; then
+	if [ $(wc -l <index.html) -gt 0 ] ; then
+	  :
+  fi
+else
+	$html_output > index.html
+fi
+  
