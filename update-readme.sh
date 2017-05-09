@@ -22,10 +22,12 @@ echo "You need to update your README"
 
 sleep 2
 
-if [ -f readme.md ]; then
-    nano readme.md
-elif [ -f README.MD]; then
-    nano README.MD
-elif [ -f README.md]; then
-    nano README.md
+the_readme=`find . -iname 'readme.md' | sed 's|./||'`
+
+character_count=`wc -m < $the_readme`
+
+if [ -f $the_readme ]; then
+    until [ $character_count -ne "" ]; do
+    nano $the_readme
+    done
 fi
