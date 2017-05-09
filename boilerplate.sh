@@ -19,7 +19,7 @@ ENDHTML
 if [ -f ./index.html ]; then
 	if [ $(wc -l <index.html) -gt 0 ] ; then
 	  :
-  fi
+  	fi
 else
 	$html_output > index.html
 fi
