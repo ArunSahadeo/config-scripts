@@ -24,7 +24,7 @@ sleep 2
 if [ -f readme.md ]; then
     line_count=`wc -l readme.md`
     original_line_count=$line_count
-    until [ $line_count != $original_line_count ]; do
+    until [ $line_count -ne $original_line_count ]; do
         nano readme.md
     done
 elif [ -f README.MD]; then
