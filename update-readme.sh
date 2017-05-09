@@ -25,8 +25,8 @@ readme_characters=`wc -m < "$the_readme"`
 
 if [ -f "$the_readme" ]; then
     until [ "$readme_characters" -ne "$character_count" ]; do
-    	nano "$the_readme"
-	if [ "$readme_characters" -gt "$character_count" || "$readme_characters" -lt "$character_count" ]; then
+    	$EDITOR "$the_readme"
+	if [ "$readme_characters" -gt "$character_count" ] || [ "$readme_characters" -lt "$character_count" ]; then
 		exit
 	fi
     done
