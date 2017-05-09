@@ -22,9 +22,15 @@ echo "You need to update your README"
 sleep 2
 
 if [ -f readme.md ]; then
-    nano readme.md
+    line_count=`wc -l readme.md`
+    original_line_count=$line_count
+    until [ $line_count != $original_line_count ]; do
+        nano readme.md
+    done
 elif [ -f README.MD]; then
+    line_count=`wc -l README`
     nano README.MD
 elif [ -f README.md]; then
+    line_count=`wc -l README.md`
     nano README.md
 fi
