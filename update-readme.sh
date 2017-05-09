@@ -20,14 +20,8 @@ echo "You need to update your README"
 
 sleep 2
 
-readonly character_count=`wc -m < "$the_readme"`
-readme_characters=`wc -m < "$the_readme"`
+character_count=$(stat -c '%s' "$the_readme")
 
-if [ -f "$the_readme" ]; then
-    until [ "$readme_characters" -ne "$character_count" ]; do
-    	$EDITOR "$the_readme"
-	if [ "$readme_characters" -gt "$character_count" ] || [ "$readme_characters" -lt "$character_count" ]; then
-		exit
-	fi
-    done
-fi
+while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
+	$EDITOR "$the_readme"
+done
