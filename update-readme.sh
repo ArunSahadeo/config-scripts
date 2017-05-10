@@ -25,7 +25,7 @@ which_os=`uname | tr '[A-Z]' '[a-z]'`
 
 if [ "$which_os" == "darwin" ]; then
     character_count=$(stat -f '%s' "$the_readme")
-        while (($(stat -f '%s' "$the_readme") == "$character_count" )); do
+    while (($(stat -f '%s' "$the_readme") == "$character_count" )); do
             $EDITOR "$the_readme"
         done
 else
