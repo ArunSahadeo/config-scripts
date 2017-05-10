@@ -75,6 +75,22 @@ rm commands.txt && rm results.txt
 
 sleep 2
 
+if [ -d wp-admin ] || [ -d wp-includes ]; then
+    wordpress_project="True"
+elif [ -d storage ] || [ -d public ]; then
+    if [ ! -f Vagrantfile ]; then
+        echo "This Laravel project does not have a Vagrantfile"
+    fi
+    laravel_project="True"
+fi
+
+if [ $laravel_project ]; then
+    if [ -f ".env" ]; then
+        project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
+        http_code=`curl -o /dev/null --silent -m 20 --head --write-out '%{http_code}\n' "$project_url"`
+    fi
+fi  
+
 which_os=`uname | tr '[A-Z]' '[a-z]'`
 
 if [ "$which_os" == "darwin" ]; then
