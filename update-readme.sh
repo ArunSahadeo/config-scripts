@@ -34,4 +34,3 @@ else
     done
 fi
 
-echo $the_readme
