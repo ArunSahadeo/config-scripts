@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 
+getArray() {
+    commands=() # Create array
+    while IFS= read -r line # Read a line
+    do
+        commands+=("$line") # Append line to the array
+    done < "$1"
+}
+
+has_duplicates()
+{
+  {
+    sort | uniq -d | grep . -qc
+  } < "$1"
+}
+
 readme_count=$()
 
 the_readme=`find . -iname 'readme.md' | sed 's|./||'`
@@ -22,31 +37,11 @@ touch commands.txt
 
 echo "$available_commands" > commands.txt
 
-getArray() {
-    commands=() # Create array
-    while IFS= read -r line # Read a line
-    do
-        commands+=("$line") # Append line to the array
-    done < "$1"
-}
-
 getArray "commands.txt"
 
 for command in "${commands[@]}"; do
 
-    if grep -qx ":" "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "!" "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "." "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "[" "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "]" "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "{" "$command" 2>/dev/null; then
-        continue
-    elif grep -qx "}" "$command" 2>/dev/null; then
+    if grep -qx ":\|!\|.\|[\|]|\{\|}" "$command" 2>/dev/null; then
         continue
     else
         :
@@ -57,13 +52,6 @@ for command in "${commands[@]}"; do
         echo "Command not found" >> results.txt
     fi 
 done
-
-has_duplicates()
-{
-  {
-    sort | uniq -d | grep . -qc
-  } < "$1"
-}
 
 if ! has_duplicates results.txt; then
   exit
@@ -91,7 +79,7 @@ if [ $laravel_project ]; then
     fi
 fi  
 
-which_os=`uname | tr '[A-Z]' '[a-z]'`
+which_os=`uname | tr 'A-Z' 'a-z'`
 
 if [ "$which_os" == "darwin" ]; then
     character_count=`wc -m < "$the_readme"`
