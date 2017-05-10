@@ -20,8 +20,15 @@ echo "You need to update your README"
 
 sleep 2
 
-character_count=$(stat -c '%s' "$the_readme")
 
-while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
+which_os=`uname | tr '[A-Z]' '[a-z]'`
+
+if [ "$which_os" == "darwin" ]; then
+    character_count=$(stat -x '%s' "$the_readme")
+else
+    character_count=$(stat -c '%s' "$the_readme")
+fi
+
+while (($(stat -c '%s' "$the_readme") == "$character_count" )) || (($(stat -x '%s' "$the_readme") == "$character_count" )); do
 	$EDITOR "$the_readme"
 done
