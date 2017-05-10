@@ -16,7 +16,62 @@ if [ "$readme_count" -gt 1 ]; then
     exit
 fi
 
+available_commands=$(compgen -ac)
+
+touch commands.txt
+
+echo "$available_commands" > commands.txt
+
+getArray() {
+    commands=() # Create array
+    while IFS= read -r line # Read a line
+    do
+        commands+=("$line") # Append line to the array
+    done < "$1"
+}
+
+getArray "commands.txt"
+
+for command in "${commands[@]}"; do
+
+    if grep -qx ":" "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "!" "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "." "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "[" "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "]" "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "{" "$command" 2>/dev/null; then
+        continue
+    elif grep -qx "}" "$command" 2>/dev/null; then
+        continue
+    else
+        :
+    fi
+
+    if ! grep -Fxq "$command" "$the_readme"; then
+        touch results.txt
+        echo "Command not found" >> results.txt
+    fi 
+done
+
+has_duplicates()
+{
+  {
+    sort | uniq -d | grep . -qc
+  } < "$1"
+}
+
+if ! has_duplicates results.txt; then
+  exit
+fi
+
 echo "You need to update your README"
+
+rm commands.txt && rm results.txt
 
 sleep 2
 
@@ -33,4 +88,3 @@ else
         $EDITOR "$the_readme"
     done
 fi
-
