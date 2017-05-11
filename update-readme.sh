@@ -86,7 +86,7 @@ else
     :
 fi
 
-if [ $laravel_project ] && [ has_vagrant ] && [ $laravel_project == "True" ] && [ has_vagrant == "Yes" ]; then
+if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "True" ] && [ $has_vagrant == "Yes" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         vagrant_status=`vagrant status`
@@ -114,7 +114,7 @@ if [ $laravel_project ] && [ has_vagrant ] && [ $laravel_project == "True" ] && 
             :
         fi
     fi
-elif [ $laravel_project ] &&  [ has_vagrant ] &&  [ $laravel_project == "True" ] && [ has_vagrant == "No" ]; then
+elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project == "True" ] && [ $has_vagrant == "No" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         eval "$(php artisan serve)"
