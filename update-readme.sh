@@ -141,6 +141,8 @@ elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project 
                 done
         fi
     fi
+elif [ ! -z $wordpress_project ] && [ $wordpress_project == "True" ]; then
+	
 else
     :
 fi
