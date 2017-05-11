@@ -99,7 +99,7 @@ if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagran
             command_arr=()
             while ( $(curl --write-out %{http_code} --silent --output /dev/null "$project_url") != 200 ); do
                 read $command
-                commandArray $command
+                commandArray "$command"
                 for command in "${!shell_commands[@]}"; do
                     eval "$command"
                 done
