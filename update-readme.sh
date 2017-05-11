@@ -103,11 +103,15 @@ if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagran
                     eval "$command"
                 done
             done
+        else
+            :
         fi
         if [ ! -z "$shell_commands" ]; then
                 for command in "${!shell_commands[@]}"; do
                     echo "$command" >> "$the_readme"
                 done
+        else
+            :
         fi
     fi
 elif [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagrant == "No" ]; then
