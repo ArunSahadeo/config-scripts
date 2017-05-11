@@ -31,7 +31,7 @@ if [ -f "$the_readme" ]; then
     readme_count=`git log --oneline "$the_readme" | wc -l`
 else
     echo "There is not a README in this directory"
-    return
+    exit
 fi
 
 if [ "$readme_count" -gt 1 ]; then
