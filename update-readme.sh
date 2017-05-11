@@ -126,4 +126,4 @@ else
      while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
         $EDITOR "$the_readme"
     done
-find
+fi
