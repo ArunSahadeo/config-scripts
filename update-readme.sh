@@ -8,6 +8,14 @@ getArray() {
     done < "$1"
 }
 
+commandArray() {
+    shell_commands=() # Create array
+    while IFS= read -r shell_command # Read a line
+    do
+        shell_commands+=("$shell_command") # Append line to the array
+    done < "$1"
+}
+
 has_duplicates()
 {
   {
@@ -69,20 +77,42 @@ if [ -d wp-admin ] || [ -d wp-includes ]; then
 elif [ -d storage ] || [ -d public ]; then
     if [ ! -f Vagrantfile ]; then
         echo "This Laravel project does not have a Vagrantfile"
+        laravel_project="True"
+        has_vagrant="No"
     fi
     laravel_project="True"
+    has_vagrant="Yes"
+else
+    :
 fi
 
-if [ $laravel_project ]; then
+if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagrant == "Yes" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         vagrant_status=`vagrant status`
         if grep -Fxq "poweroff" "$vagrant_status"; then
             vagrant up
         fi
-        http_code=`curl -o /dev/null --silent -m 20 --head --write-out '%{http_code}\n' "$project_url"`
+        http_code=$(curl --write-out %{http_code} --silent --output /dev/null "$project_url")
+        if $http_code != 200; then
+            echo "Your Laravel site isn't working locally"
+            command_arr=()
+            while ( $(curl --write-out %{http_code} --silent --output /dev/null "$project_url") != 200 ); do
+                read $command
+                commandArray $command
+                for command in "${!shell_commands[@]}"; do
+                    eval "$command"
+                done
+            done
+        if [ ! -z "$shell_commands" ]; then
+                for command in "${!shell_commands[@]}"; do
+                    echo "$command" >> "$the_readme"
+                done
+        fi
     fi
-fi  
+else
+    :
+fi
 
 which_os=`uname | tr 'A-Z' 'a-z'`
 
@@ -96,4 +126,4 @@ else
      while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
         $EDITOR "$the_readme"
     done
-fi
+find
