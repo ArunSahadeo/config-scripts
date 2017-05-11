@@ -86,7 +86,7 @@ else
     :
 fi
 
-if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagrant == "Yes" ]; then
+if [ $laravel_project ] && [ has_vagrant ] && [ $laravel_project == "True" ] && [ has_vagrant == "Yes" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         vagrant_status=`vagrant status`
@@ -97,7 +97,7 @@ if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagran
         if $http_code != 200; then
             echo "Your Laravel site isn't working locally"
             while ( $(curl --write-out %{http_code} --silent --output /dev/null "$project_url") != 200 ); do
-                read $command
+                read "$command"
                 commandArray "$command"
                 for command in "${!shell_commands[@]}"; do
                     eval "$command"
@@ -114,7 +114,7 @@ if [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagran
             :
         fi
     fi
-elif [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagrant == "No" ]; then
+elif [ $laravel_project ] &&  [ has_vagrant ] &&  [ $laravel_project == "True" ] && [ has_vagrant == "No" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         eval "$(php artisan serve)"
@@ -122,7 +122,7 @@ elif [ $laravel_project && has_vagrant && $laravel_project == "True" && has_vagr
         if $http_code != 200; then
             echo "Your Laravel site isn't working locally"
             while ( $(curl --write-out %{http_code} --silent --output /dev/null http://localhost:8000) != 200 ); do
-                read $command
+                read "$command"
                 commandArray "$command"
                 for command in "${!shell_commands[@]}"; do
                     eval "$command"
