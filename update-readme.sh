@@ -139,16 +139,4 @@ else
     :
 fi
 
-which_os=`uname | tr 'A-Z' 'a-z'`
-
-if [ "$which_os" == "darwin" ]; then
-    character_count=`wc -m < "$the_readme"`
-    while (($(wc -m < "$the_readme") == "$character_count" )); do
-        open -e "$the_readme"
-    done
-else
-    character_count=$(stat -c '%s' "$the_readme")
-     while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
-        $EDITOR "$the_readme"
-    done
-fi
+git status
