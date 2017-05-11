@@ -39,6 +39,8 @@ echo "$available_commands" > commands.txt
 
 getArray "commands.txt"
 
+touch results.txt
+
 for command in "${commands[@]}"; do
 
     if grep -qx ":\|!\|.\|[\|]|\{\|}" "$command" 2>/dev/null; then
@@ -48,7 +50,6 @@ for command in "${commands[@]}"; do
     fi
 
     if ! grep -Fxq "$command" "$the_readme"; then
-        touch results.txt
         echo "Command not found" >> results.txt
     fi 
 done
@@ -75,6 +76,10 @@ fi
 if [ $laravel_project ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
+        vagrant_status=`vagrant status`
+        if grep -Fxq "poweroff" "$vagrant_status"; then
+            vagrant up
+        fi
         http_code=`curl -o /dev/null --silent -m 20 --head --write-out '%{http_code}\n' "$project_url"`
     fi
 fi  
