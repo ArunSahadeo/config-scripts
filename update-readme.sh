@@ -117,7 +117,7 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
 elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project == "True" ] && [ $has_vagrant == "No" ]; then
     if [ -f ".env" ]; then
         project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
-        eval "$(php artisan serve)"
+        php artisan serve
         http_code=$(curl --write-out %{http_code} --silent --output /dev/null http://localhost:8000)
         if $http_code != 200; then
             echo "Your Laravel site isn't working locally"
