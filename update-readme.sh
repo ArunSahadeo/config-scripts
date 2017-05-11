@@ -25,7 +25,7 @@ has_duplicates()
 
 readme_count=$()
 
-the_readme=`find . -iname 'readme.md' | sed 's|./||'`
+the_readme=`find . -iname -maxdepth 1 'readme.md' | sed 's|./||'`
 
 if [ -f "$the_readme" ]; then
     readme_count=`git log --oneline "$the_readme" | wc -l`
@@ -107,8 +107,8 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             :
         fi
         if [ ! -z "$shell_commands" ]; then
-                $number=0;
-                $dot=". "
+                number=0;
+                dot=". "
                 for command in "${!shell_commands[@]}"; do
                     $number++
                     echo "$number$dot$command" >> "$the_readme"
@@ -133,8 +133,8 @@ elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project 
             done
         fi
         if [ ! -z "$shell_commands" ]; then
-                $number=0;
-                $dot=". "
+                number=0;
+                dot=". "
                 for command in "${!shell_commands[@]}"; do
                     $number++
                     echo "$number$dot$command" >> "$the_readme"
