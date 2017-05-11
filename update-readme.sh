@@ -107,8 +107,11 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             :
         fi
         if [ ! -z "$shell_commands" ]; then
+                $number=0;
+                $dot=". "
                 for command in "${!shell_commands[@]}"; do
-                    echo "$command" >> "$the_readme"
+                    $number++
+                    echo "$number$dot$command" >> "$the_readme"
                 done
         else
             :
@@ -131,7 +134,7 @@ elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project 
         fi
         if [ ! -z "$shell_commands" ]; then
                 $number=0;
-                $dot="."
+                $dot=". "
                 for command in "${!shell_commands[@]}"; do
                     $number++
                     echo "$number$dot$command" >> "$the_readme"
