@@ -60,6 +60,8 @@ fi
 
 echo "You need to update your README"
 
+rm commands.txt && rm results.txt
+
 sleep 2
 
 which_os=`uname | tr '[A-Z]' '[a-z]'`
