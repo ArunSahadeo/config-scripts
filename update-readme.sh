@@ -17,7 +17,7 @@ has_duplicates()
 
 readme_count=$()
 
-the_readme=`find . -iname -maxdepth 1 'readme.md' | sed 's|./||'`
+the_readme=`find . -maxdepth 1 -iname 'readme.md' | sed 's|./||'`
 
 if [ -f "$the_readme" ]; then
     readme_count=`git log --oneline "$the_readme" | wc -l`
@@ -59,8 +59,6 @@ if ! has_duplicates results.txt; then
 fi
 
 echo "You need to update your README"
-
-rm commands.txt && rm results.txt
 
 sleep 2
 
