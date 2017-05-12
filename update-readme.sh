@@ -64,18 +64,108 @@ rm commands.txt && rm results.txt
 
 sleep 2
 
-which_os=`uname | tr '[A-Z]' '[a-z]'`
-
-if [ "$which_os" == "darwin" ]; then
-    character_count=`wc -m < "$the_readme"`
-    while (($(wc -m < "$the_readme") == "$character_count" )); do
-        open -e "$the_readme"
-    done
+if [ -d wp-admin ] || [ -d wp-includes ]; then
+    wordpress_project="True"
+elif [ -d storage ] || [ -d public ]; then
+    if [ ! -f Vagrantfile ]; then
+        echo "This Laravel project does not have a Vagrantfile"
+        laravel_project="True"
+        has_vagrant="No"
+    fi
+    laravel_project="True"
+    has_vagrant="Yes"
 else
-    character_count=$(stat -c '%s' "$the_readme")
-     while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
-        $EDITOR "$the_readme"
-    done
+    :
+fi
+
+if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "True" ] && [ $has_vagrant == "Yes" ]; then
+    if [ -f ".env" ]; then
+        project_url=`cat .env | grep APP_URL | tr 'APP_URL=' ' ' | xargs`
+        vagrant_status='vagrant status'
+        $vagrant_status > vagrant-status.txt
+        vagrant_up='vagrant up'
+        if grep -Fqi "poweroff" vagrant-status.txt; then
+            rm vagrant-status.txt
+            $vagrant_up
+        else
+            :
+        fi
+        http_code=$(HEAD "$project_url" | head -1 | cut -d ' ' -f 1)
+        if [ $http_code -eq 500 ] ; then
+            echo "Your Laravel site isn't working locally"
+            while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
+                read command
+                shell_commands=("${shell_commands[@]}" $command)
+                for command in "${shell_commands[@]}"; do
+                    $command
+                done
+            done
+        else
+            :
+        fi
+        if [ ! -z "$shell_commands" ] && [ $http_code -neq 500 ]; then
+                number=0;
+                dot=". "
+                for command in "${shell_commands[@]}"; do
+                    $number++
+                    echo "$number$dot$command" >> "$the_readme"
+                done
+        else
+            :
+        fi
+    fi
+elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project == "True" ] && [ $has_vagrant == "No" ]; then
+    if [ -f ".env" ]; then
+        project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
+        php artisan serve
+        http_code=$(HEAD http://localhost:8000 | head -1 | cut -d ' ' -f 1)
+        if [ $http_code -eq 500 ]; then
+            echo "Your Laravel site isn't working locally"
+            while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
+                read command
+                shell_commands=("${shell_commands[@]}" $command)
+                for command in "${shell_commands[@]}"; do
+                    $command
+                done
+            done
+        fi
+        if [ ! -z "$shell_commands" ]; then
+                number=0
+                dot=". "
+                for command in "${!shell_commands[@]}"; do
+                    $number++
+                    echo "$number$dot$command" >> "$the_readme"
+                done
+        fi
+    fi
+elif [ ! -z $wordpress_project ] && [ $wordpress_project == "True" ]; then
+	which_os=`uname | tr '[A-Z]' '[a-z]'`
+
+	if [ "$which_os" == "darwin" ]; then
+    	character_count=`wc -m < "$the_readme"`
+    	while (($(wc -m < "$the_readme") == "$character_count" )); do
+        	open -e "$the_readme"
+    	done
+	else
+    	character_count=$(stat -c '%s' "$the_readme")
+     	while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
+        	$EDITOR "$the_readme"
+    	done
+	fi
+else
+    which_os=`uname | tr '[A-Z]' '[a-z]'`
+
+	if [ "$which_os" == "darwin" ]; then
+    	character_count=`wc -m < "$the_readme"`
+    	while (($(wc -m < "$the_readme") == "$character_count" )); do
+        	open -e "$the_readme"
+    	done
+	else
+    	character_count=$(stat -c '%s' "$the_readme")
+     	while (($(stat -c '%s' "$the_readme") == "$character_count" )); do
+        	$EDITOR "$the_readme"
+    	done
+	fi
 fi
 
 git status
