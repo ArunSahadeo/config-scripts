@@ -100,18 +100,29 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
         fi
         http_code=$(HEAD "$project_url" | head -1 | cut -d ' ' -f 1)
         if [ $http_code -eq 500 ] ; then
-            echo "Your Laravel site isn't working locally"
-            create_history='vagrant ssh -- -t "crontab -l command_history && echo '* * * * * history > history.txt' && crontab command_history && bash"'
-            gnome-terminal -e "$create_history"
-            if [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -neq 500 ]; then
-                homestead_address=`echo $project_url | cut -f3 -d '/'`
-                get_history=`scp -P 22 vagrant@"$homestead_address":~/history.txt .`
-	fi
+            echo "Your Laravel site isn't working locally"            
+            gnome-terminal -e "bash -c 'vagrant ssh; exec bash'"
+            homestead_address=`echo $project_url | cut -f3 -d '/'`
+            while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
+            	case $http_code in
+            		200)
+						read -p "Press [Enter] once you've run history > history.txt in the Vagrant machine" < /dev/tty
+						$(scp -P 22 vagrant@"$homestead_address":~/history.txt) ;;
+					500)
+						: ;;
+				esac
+			done
         else
             :
 	fi
-        if [ ! -z history.txt ] && [ $http_code -neq 500 ]; then
-                $recent_commands=`awk '{$1=""; print $0}' history.txt | tail -n20 > vagrant_history.txt`
+		
+		until [ -f "history.txt" ]; do
+			:
+		done
+
+        if [ -f "history.txt" ] && [ $http_code -eq 200 ]; then
+                recent_commands="awk '{$1=""; print $0}' history.txt | tail -n5 > vagrant_history.txt"
+                $recent_commands
                 commandArray "vagrant_history.txt"
                 number=0;
                 dot=". "
@@ -138,10 +149,10 @@ elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project 
                 done
             done
         fi
-        if [ ! -z "$shell_commands" ]; then
+        if [ "$shell_commands" ]; then
                 number=0
                 dot=". "
-                for command in "${!shell_commands[@]}"; do
+                for command in "${shell_commands[@]}"; do
                     $number++
                     echo "$number$dot$command" >> "$the_readme"
                 done
