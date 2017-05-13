@@ -8,6 +8,14 @@ getArray() {
     done < "$1"
 }
 
+commandArray() {
+    shell_commands=() # Create array
+    while IFS= read -r line # Read a line
+    do
+        commands+=("$line") # Append line to the array
+    done < "$1"
+}
+
 has_duplicates()
 {
   {
@@ -102,6 +110,8 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             :
         fi
         if [ ! -z history.txt ] && [ $http_code -neq 500 ]; then
+                $recent_commands=`awk '{$1=""; print $0}' history.txt | tail -n20 > vagrant_history.txt`
+                commandArray "vagrant_history.txt"
                 number=0;
                 dot=". "
                 for command in "${shell_commands[@]}"; do
@@ -165,5 +175,6 @@ else
     	done
 	fi
 fi
-
+rm history.txt
+rm vagrant_history.txt
 git status
