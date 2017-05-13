@@ -103,12 +103,13 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             echo "Your Laravel site isn't working locally"
             create_history='vagrant ssh -- -t "crontab -l command_history && echo '* * * * * history > history.txt' && crontab command_history && bash"'
             gnome-terminal -e "$create_history"
-            if [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -neq 500 ]; do
+            if [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -neq 500 ]; then
                 homestead_address=`echo $project_url | cut -f3 -d '/'`
                 get_history=`scp -P 22 vagrant@"$homestead_address":~/history.txt .`
+	fi
         else
             :
-        fi
+	fi
         if [ ! -z history.txt ] && [ $http_code -neq 500 ]; then
                 $recent_commands=`awk '{$1=""; print $0}' history.txt | tail -n20 > vagrant_history.txt`
                 commandArray "vagrant_history.txt"
