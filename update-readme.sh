@@ -25,6 +25,8 @@ has_duplicates()
 
 readme_count=$()
 
+which_os=`uname | tr 'A-Z' 'a-z'`
+
 the_readme=`find . -maxdepth 1 -iname 'readme.md' | sed 's|./||'`
 
 if [ -f "$the_readme" ]; then
@@ -100,8 +102,13 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
         fi
         http_code=$(HEAD "$project_url" | head -1 | cut -d ' ' -f 1)
         if [ $http_code -eq 500 ] ; then
-            echo "Your Laravel site isn't working locally"            
-            gnome-terminal -e "bash -c 'vagrant ssh; exec bash'"
+            echo "Your Laravel site isn't working locally"
+            if [ "$which_os" == "darwin" ]; then
+                read $laravel_site
+                osascript -e 'tell application "Terminal" to do script "bash -c 'cd "$laravel_site" && vagrant ssh > /dev/null 2>&1 &'"'
+            else             
+                gnome-terminal -e "bash -c 'vagrant ssh; exec bash'"
+            fi
             homestead_address=`echo $project_url | cut -f3 -d '/'`
             while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
             	case $http_code in
@@ -117,7 +124,7 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
 	fi
 		
 		until [ -f "history.txt" ]; do
-			:
+			echo "File history.txt has not been downloaded yet"
 		done
 
         if [ -f "history.txt" ] && [ $http_code -eq 200 ]; then
@@ -136,7 +143,6 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
     fi
 elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project == "True" ] && [ $has_vagrant == "No" ]; then
     if [ -f ".env" ]; then
-        project_url=`cat .env | grep -i APP_URL | tr 'APP_URL=' ' ' | xargs`
         php artisan serve
         http_code=$(HEAD http://localhost:8000 | head -1 | cut -d ' ' -f 1)
         if [ $http_code -eq 500 ]; then
@@ -159,7 +165,6 @@ elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project 
         fi
     fi
 elif [ ! -z $wordpress_project ] && [ $wordpress_project == "True" ]; then
-	which_os=`uname | tr '[A-Z]' '[a-z]'`
 
 	if [ "$which_os" == "darwin" ]; then
     	character_count=`wc -m < "$the_readme"`
@@ -173,7 +178,6 @@ elif [ ! -z $wordpress_project ] && [ $wordpress_project == "True" ]; then
     	done
 	fi
 else
-    which_os=`uname | tr '[A-Z]' '[a-z]'`
 
 	if [ "$which_os" == "darwin" ]; then
     	character_count=`wc -m < "$the_readme"`
