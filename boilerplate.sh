@@ -21,6 +21,6 @@ if [ -f ./index.html ]; then
 	  :
   	fi
 else
-	$html_output > index.html
+ 	echo $html_output > index.html
 fi
   
