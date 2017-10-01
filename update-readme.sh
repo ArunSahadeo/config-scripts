@@ -89,14 +89,21 @@ else
 fi
 
 if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "True" ] && [ $has_vagrant == "Yes" ]; then
-    if [ -f ".env" ]; then
+    if [ -f ".env" ] || [ -f ".env.example" ]; then
+        if [ -f ".env.example" ]; then
+            cp .env.example .env
+        fi
+        if [ ! -f "Homestead.yaml" ]; then
+            if [ ! -d vendor ]; then
+                composer install --ignore-platform-reqs
+            fi
+            if [ -f vendor/laravel/homestead/homestead ]; then
+                php vendor/laravel/homestead/homestead make
+            fi 
+        fi
         project_url=`cat .env | grep APP_URL | tr 'APP_URL=' ' ' | xargs`
-        vagrant_status='vagrant status'
-        $vagrant_status > vagrant-status.txt
-        vagrant_up='vagrant up'
-        if grep -Fqi "poweroff" vagrant-status.txt; then
-            rm vagrant-status.txt
-            $vagrant_up
+        if vagrant status | grep -Fqi "poweroff" || vagrant status | grep -Fqi "not created"; then
+            vagrant up
         else
             :
         fi
@@ -113,19 +120,14 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
             	case $http_code in
             		200)
-						read -p "Press [Enter] once you've run history > history.txt in the Vagrant machine" < /dev/tty
 						$(scp -P 22 vagrant@"$homestead_address":~/history.txt) ;;
 					500)
-						: ;;
+						read -p "Press [Enter] once you've run history > history.txt in the Vagrant machine" < /dev/tty
 				esac
 			done
         else
             :
 	fi
-		
-		until [ -f "history.txt" ]; do
-			echo "File history.txt has not been downloaded yet"
-		done
 
         if [ -f "history.txt" ] && [ $http_code -eq 200 ]; then
                 recent_commands="awk '{$1=""; print $0}' history.txt | tail -n5 > vagrant_history.txt"
