@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+
+
 getArray() {
     commands=() # Create array
     while IFS= read -r line # Read a line
@@ -77,20 +79,22 @@ sleep 2
 if [ -d wp-admin ] || [ -d wp-includes ]; then
     wordpress_project="True"
 elif [ -d storage ] || [ -d public ]; then
+
+    laravel_project="True"
+
     if [ ! -f Vagrantfile ]; then
         echo "This Laravel project does not have a Vagrantfile"
-        laravel_project="True"
         has_vagrant="No"
+    else
+        has_vagrant="Yes"
     fi
-    laravel_project="True"
-    has_vagrant="Yes"
 else
     :
 fi
 
 if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "True" ] && [ $has_vagrant == "Yes" ]; then
     if [ -f ".env" ] || [ -f ".env.example" ]; then
-        if [ -f ".env.example" ]; then
+        if [ ! -f ".env" ]; then
             cp .env.example .env
         fi
         if [ ! -f "Homestead.yaml" ]; then
@@ -102,7 +106,7 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
             fi 
         fi
         project_url=`cat .env | grep APP_URL | tr 'APP_URL=' ' ' | xargs`
-        if vagrant status | grep -Fqi "poweroff" || vagrant status | grep -Fqi "not created"; then
+        if vagrant status &>/dev/null | grep -Fqi "poweroff" || vagrant status &>/dev/null | grep -Fqi "not created"; then
             vagrant up
         else
             :
@@ -142,30 +146,57 @@ if [ ! -z $laravel_project ] && [ ! -z $has_vagrant ] && [ $laravel_project == "
         else
             :
         fi
-    fi
+   else
+       printf "%s\n" "An .env or .env.example file does not exist"
+       exit 0
+fi
 elif [ ! -z $laravel_project ] &&  [ ! -z $has_vagrant ] &&  [ $laravel_project == "True" ] && [ $has_vagrant == "No" ]; then
-    if [ -f ".env" ]; then
-        php artisan serve
-        http_code=$(HEAD http://localhost:8000 | head -1 | cut -d ' ' -f 1)
-        if [ $http_code -eq 500 ]; then
-            echo "Your Laravel site isn't working locally"
-            while [ $(HEAD "$project_url" | head -1 | cut -d ' ' -f 1) -eq 500 ]; do
-                read command
-                shell_commands=("${shell_commands[@]}" $command)
-                for command in "${shell_commands[@]}"; do
-                    $command
-                done
-            done
+    if [ ! -f "Homestead.yaml" ]; then
+        if [ ! -d vendor ]; then
+            composer install --ignore-platform-reqs
         fi
-        if [ "$shell_commands" ]; then
-                number=0
-                dot=". "
-                for command in "${shell_commands[@]}"; do
-                    $number++
-                    echo "$number$dot$command" >> "$the_readme"
-                done
-        fi
+        if [ -f vendor/laravel/homestead/homestead ]; then
+            php vendor/laravel/homestead/homestead make
+        fi 
     fi
+    if [ ! -f ".env" ]; then
+        cp .env.example .env
+    elif [ ! -f ".env" ] && [ ! -f ".env.example" ]; then
+        printf "%s\n" "Neither an .env file nor an .env.example file are present"
+        exit 0
+    fi
+    
+    ( php artisan serve & ) > /dev/null 2>&1
+    SERVER_PID=$(ps aux | grep 8000 | cut -d " " -f 4)
+    http_code=$(HEAD http://localhost:8000 | head -1 | cut -d ' ' -f 1)
+    
+    if [ $http_code -eq 500 ]; then
+        echo "Your Laravel site isn't working locally"
+        kill $SERVER_PID
+        printf "%s\n" "We have terminated the server, please enter the commands you wish to try and then enter on a blank line when done" 
+        
+        while read command; do
+       
+           "${shell_commands[@]}" $command
+
+            if [ -z "$command" ]; then
+                break
+            fi
+        
+        done
+    fi
+
+    
+    
+    if [ "$shell_commands" ]; then
+            number=0
+            dot=". "
+            for command in "${shell_commands[@]}"; do
+                $number++
+                echo "$number$dot$command" >> "$the_readme"
+            done
+    fi
+
 elif [ ! -z $wordpress_project ] && [ $wordpress_project == "True" ]; then
 
 	if [ "$which_os" == "darwin" ]; then
@@ -193,6 +224,13 @@ else
     	done
 	fi
 fi
-rm history.txt
-rm vagrant_history.txt
+
+if [ -f history.txt ]; then 
+    rm history.txt
+fi
+
+if [ -f vagrant_history.txt ]; then
+    rm vagrant_history.txt
+fi
+
 git status
