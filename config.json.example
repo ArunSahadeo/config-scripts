@@ -1,0 +1,9 @@
+{
+    "initialPage" : "http://example.com",
+    "width"       : "1920",
+    "height"      : "1080",
+    "redirectURL" : "http://localhost", 
+    "timeout"     : "2000",
+    "folder":     : "test_folder",
+    "outputFile"  : "test_file.png"
+}
