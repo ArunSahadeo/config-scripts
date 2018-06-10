@@ -1,0 +1,9 @@
+[user]
+	email = arunjamessahadeo@gmail.com
+	name = Arun Sahadeo
+[alias]
+	comm = commit --verbose
+[mergetool]
+	keepBackup = false
+[merge]
+	tool = vimdiff
