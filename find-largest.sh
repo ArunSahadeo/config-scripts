@@ -5,8 +5,24 @@ if [ ! "$1" ]; then
     exit
 fi
 
+excludePaths=${@:2}
+
+for excludePath in $excludePaths; do
+    echo $excludePath
+done
+
 if [ "$1" == "--help" ]; then
-    echo "The first required argument must be the folder you wish to search."
+cat << EOL
+The first required argument must be the folder you wish to search.
+
+If you want to exclude any files or directories from your search,
+please pass them as additional parameters with the following syntax:
+
+Directory:
+    -d=*DIRNAME*
+File:
+    -f=*FILENAME*
+EOL
     exit
 fi
 
